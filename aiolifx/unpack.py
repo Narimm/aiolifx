@@ -223,7 +223,24 @@ def unpack_lifx_message(packed_message):
             colors.append(color)
         payload = {"count": count, "index": index, "color": colors}
         message = MultiZoneStateMultiZone(target_addr, source_id, seq_num, payload, ack_requested, response_requested)
-
+    elif message_type == MSG_IDS[SwitchSetRelayPower]:
+        relay = struct.unpack("c", payload_str[0:1])[0]
+        level = struct.unpack("H", payload_str[1:3])[0]
+        payload = {"relay_index": relay, "power_level": level}
+        message = SwitchSetRelayPower(target_addr, source_id, seq_num, payload, ack_requested, response_requested)
+    elif message_type == MSG_IDS[SwitchStateRelayPower]:
+        relay = struct.unpack("c", payload_str[0:1])[0]
+        level = struct.unpack("H", payload_str[1:3])[0]
+        payload = {"relay_index": relay, "power_level": level}
+        message = SwitchStateRelayPower(target_addr, source_id, seq_num, payload, ack_requested, response_requested)
+    elif message_type == MSG_IDS[SwitchGetRelayPower]:
+        relay = struct.unpack("c", payload_str[0:1])[0]
+        payload = {"relay_index": relay}
+        message = SwitchGetRelayPower(target_addr, source_id, seq_num, payload, ack_requested, response_requested)
+    elif message_type == MSG_IDS[StateUnhandled]:
+        unhandled_type = struct.unpack("H", payload_str[0:2])[0]
+        payload = {"unhandled_type": unhandled_type}
+        message = StateUnhandled(target_addr,source_id,seq_num,payload,ack_requested,response_requested)
     else:
         message = Message(message_type, target_addr, source_id, seq_num, ack_requested, response_requested)
 

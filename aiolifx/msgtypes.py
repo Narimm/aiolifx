@@ -552,8 +552,45 @@ class MultiZoneGetColorZones(Message):
         end_index = little_endian(bitstring.pack("uint:8", self.end_index))
         payload = start_index + end_index
         return payload
-
-
+class SwitchGetRelayPower(Message):
+    def __init__(self, target_addr, source_id, seq_num, payload, ack_requested=False, response_requested=False):
+        self.index = payload["relay_index"]
+        super(SwitchGetRelayPower, self).__init__(MSG_IDS[SwitchGetRelayPower], target_addr, source_id, seq_num , ack_requested, response_requested)
+    def get_payload(self):
+        index = little_endian(bitstring.pack("uint:8",self.index))
+        payload = index
+        return payload
+class SwitchStateRelayPower(Message):
+    def __init__(self, target_addr, source_id, seq_num, payload, ack_requested=False, response_requested=False):
+        self.index = payload["relay_index"]
+        self.power_level = payload["power_level"]
+        super(SwitchStateRelayPower, self).__init__(MSG_IDS[SwitchStateRelayPower], target_addr, source_id, seq_num , ack_requested, response_requested)
+    def get_payload(self):
+        self.payload_fields.append(("relay_index", self.index))
+        self.payload_fields.append(("power_level", self.power_level))
+        index = little_endian(bitstring.pack("uint:8",self.index))
+        power_level = little_endian(bitstring.pack("uint:16",self.power_level))
+        payload = index + power_level
+        return payload
+class SwitchSetRelayPower(Message):
+    def __init__(self, target_addr, source_id, seq_num, payload, ack_requested=False, response_requested=False):
+        self.index = payload["relay_index"]
+        self.power_level = payload["power_level"]
+        super(SwitchSetRelayPower, self).__init__(MSG_IDS[SwitchSetRelayPower], target_addr, source_id, seq_num , ack_requested, response_requested)
+    def get_payload(self):
+        index = little_endian(bitstring.pack("uint:8",self.index))
+        power_level = little_endian(bitstring.pack("uint:16",self.power_level))
+        payload = index + power_level
+        return payload
+class StateUnhandled(Message):
+    def __init__(self, target_addr, source_id, seq_num, payload, ack_requested=False, response_requested=False):
+        self.type = payload["unhandled_type"]
+        super(StateUnhandled, self).__init__(MSG_IDS[StateUnhandled], target_addr, source_id, seq_num , ack_requested, response_requested)
+    def get_payload(self):
+        self.payload_fields.append(("unhandled_type", self.type))
+        type = little_endian(bitstring.pack("uint:16",self.type))
+        payload = type
+        return payload
 MSG_IDS = {     GetService: 2,
                 StateService: 3,
                 GetHostInfo: 12,
@@ -592,10 +629,16 @@ MSG_IDS = {     GetService: 2,
                 LightGetInfrared: 120,
                 LightStateInfrared: 121,
                 LightSetInfrared: 122,
+                StateUnhandled: 223,
                 MultiZoneSetColorZones: 501,
                 MultiZoneGetColorZones: 502,
                 MultiZoneStateZone: 503,
-                MultiZoneStateMultiZone: 506}
+                MultiZoneStateMultiZone: 506,
+                SwitchGetRelayPower: 816,
+                SwitchSetRelayPower: 817,
+                SwitchStateRelayPower: 818
+                }
+
 
 SERVICE_IDS = { 1: "UDP",
                 2: "reserved",
